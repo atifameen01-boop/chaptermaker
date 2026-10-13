@@ -1,0 +1,1426 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-900 text-slate-100">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diploma & Springer Nature Chapter Studio</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f7ff',
+                            100: '#e0effe',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            800: '#1e40af',
+                            900: '#1e3a8a',
+                        },
+                        springer: {
+                            50: '#fff8f0',
+                            500: '#e65100',
+                            600: '#d84315',
+                            700: '#bf360c',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Marked.js for Markdown Parsing -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #475569; }
+        
+        .prose pre { background-color: #0f172a !important; padding: 1rem; border-radius: 0.5rem; border: 1px solid #334155; color: #e2e8f0; overflow-x: auto; }
+        .prose table { width: 100%; border-collapse: collapse; margin-top: 1rem; margin-bottom: 1rem; }
+        .prose th, .prose td { border: 1px solid #334155; padding: 0.75rem 1rem; text-align: left; }
+        .prose th { background-color: #1e293b; color: #38bdf8; font-weight: 600; }
+        .prose blockquote { border-left: 4px solid #3b82f6; padding-left: 1rem; color: #94a3b8; font-style: italic; background: rgba(30,41,59,0.5); padding: 0.75rem 1rem; border-radius: 0 0.5rem 0.5rem 0; margin-y: 1rem; }
+        .prose h1, .prose h2, .prose h3, .prose h4 { color: #f8fafc; font-weight: 700; margin-top: 1.5rem; margin-bottom: 0.75rem; }
+        .prose h1 { font-size: 1.75rem; border-bottom: 1px solid #334155; padding-bottom: 0.5rem; color: #60a5fa; }
+        .prose h2 { font-size: 1.35rem; color: #38bdf8; }
+        .prose h3 { font-size: 1.1rem; color: #cbd5e1; }
+        .prose ul { list-style-type: disc; padding-left: 1.5rem; margin-y: 0.75rem; }
+        .prose ol { list-style-type: decimal; padding-left: 1.5rem; margin-y: 0.75rem; }
+        .prose li { margin-bottom: 0.35rem; }
+        .prose p { margin-bottom: 1rem; line-height: 1.7; color: #cbd5e1; }
+        .prose cite, .prose span.citation { color: #38bdf8; font-weight: 600; background: rgba(56, 189, 248, 0.1); padding: 0.1rem 0.3rem; border-radius: 0.25rem; }
+
+        @media print {
+            .no-print { display: none !important; }
+            .print-only { display: block !important; }
+            body { background: white !important; color: black !important; font-size: 11pt; }
+            .prose h1, .prose h2, .prose h3, .prose h4 { color: black !important; }
+            .prose p, .prose li { color: #1e293b !important; }
+            .prose th { background-color: #f1f5f9 !important; color: black !important; }
+            .prose th, .prose td { border: 1px solid #cbd5e1 !important; }
+            .prose pre { background-color: #f8fafc !important; border: 1px solid #cbd5e1 !important; color: black !important; }
+            .prose blockquote { border-left: 4px solid #2563eb !important; background: #f8fafc !important; color: #334155 !important; }
+            .chapter-page-break { page-break-before: always; }
+        }
+    </style>
+</head>
+<body class="h-full flex flex-col font-sans antialiased bg-slate-950 text-slate-100">
+
+    <!-- Toast Notification Banner -->
+    <div id="toast-container" class="fixed top-4 right-4 z-50 flex flex-col gap-2 max-w-md w-full pointer-events-none"></div>
+
+    <!-- Navigation / Header -->
+    <header class="no-print border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div id="header-icon-box" class="p-2 bg-blue-600/20 text-blue-400 rounded-lg border border-blue-500/30 transition-colors">
+                    <i data-lucide="book-open-check" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <h1 class="text-lg font-bold text-white tracking-wide">Academic Chapter Studio</h1>
+                        <span id="badge-mode" class="text-[10px] uppercase font-bold px-2 py-0.5 rounded bg-blue-900/80 text-blue-300 border border-blue-700">Diploma Mode</span>
+                    </div>
+                    <p class="text-xs text-slate-400">High-Density Book Chapter Generator (In-Text Citations & Bibliography Support)</p>
+                </div>
+            </div>
+
+            <div class="flex items-center space-x-2 sm:space-x-3">
+                <button id="btn-load-preset" class="px-3 py-1.5 text-xs font-medium text-slate-300 bg-slate-800 hover:bg-slate-700 rounded-md border border-slate-700 flex items-center space-x-1.5 transition">
+                    <i data-lucide="sparkles" class="w-4 h-4 text-amber-400"></i>
+                    <span>Presets</span>
+                </button>
+                <button id="btn-export-latex" class="px-3 py-1.5 text-xs font-medium text-slate-300 bg-slate-800 hover:bg-slate-700 rounded-md border border-slate-700 flex items-center space-x-1.5 transition" title="Export Springer LaTeX (.tex)">
+                    <i data-lucide="code" class="w-4 h-4 text-emerald-400"></i>
+                    <span class="hidden sm:inline">LaTeX (.tex)</span>
+                </button>
+                <button id="btn-export-word" class="px-3 py-1.5 text-xs font-medium text-slate-300 bg-slate-800 hover:bg-slate-700 rounded-md border border-slate-700 flex items-center space-x-1.5 transition" title="Export Full Word Document">
+                    <i data-lucide="file-text" class="w-4 h-4 text-blue-400"></i>
+                    <span>Word (.doc)</span>
+                </button>
+                <button id="btn-print-view" class="px-3 py-1.5 text-xs font-medium text-slate-100 bg-blue-600 hover:bg-blue-500 rounded-md border border-blue-500 flex items-center space-x-1.5 shadow-sm transition">
+                    <i data-lucide="printer" class="w-4 h-4"></i>
+                    <span class="hidden sm:inline">Print / PDF</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 grid grid-cols-1 lg:grid-cols-12 gap-6 overflow-hidden">
+        
+        <!-- Left Sidebar: Parameters & Citation Settings -->
+        <section class="no-print lg:col-span-4 bg-slate-900 border border-slate-800 rounded-xl p-5 flex flex-col h-full overflow-y-auto space-y-4 shadow-xl">
+            
+            <!-- Publisher Target Switcher -->
+            <div class="bg-slate-950 p-1.5 rounded-lg border border-slate-800 flex text-xs">
+                <button id="btn-mode-diploma" class="flex-1 py-1.5 px-2 rounded-md font-medium text-center transition bg-blue-600 text-white shadow">
+                    Diploma Standard
+                </button>
+                <button id="btn-mode-springer" class="flex-1 py-1.5 px-2 rounded-md font-medium text-slate-400 hover:text-white text-center transition">
+                    Springer Nature
+                </button>
+            </div>
+
+            <div class="border-b border-slate-800 pb-2 flex justify-between items-center">
+                <h2 class="text-sm font-semibold text-slate-200 uppercase tracking-wider flex items-center gap-2">
+                    <i data-lucide="sliders" class="w-4 h-4 text-blue-400"></i>
+                    Chapter Parameters
+                </h2>
+                <span id="lbl-format-badge" class="text-[10px] bg-blue-900/60 text-blue-300 px-2 py-0.5 rounded border border-blue-700/50">Level 4/5 TVET</span>
+            </div>
+
+            <!-- API Key Input -->
+            <div class="space-y-1.5">
+                <div class="flex justify-between items-center">
+                    <label class="block text-xs font-medium text-slate-300">Gemini API Key <span class="text-slate-500 font-normal">(Optional)</span></label>
+                    <span id="api-status-badge" class="text-[10px] bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded">Smart Auto-Mode</span>
+                </div>
+                <input type="password" id="input-api-key" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-100 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none font-mono" placeholder="Paste AI key or leave blank for offline mode">
+            </div>
+
+            <!-- Book / Course Title -->
+            <div class="space-y-1.5">
+                <label id="lbl-book-course" class="block text-xs font-medium text-slate-300">Course / Subject Name</label>
+                <input type="text" id="input-course-name" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-100 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none" placeholder="e.g. Diploma in Database Management Systems">
+            </div>
+
+            <!-- Chapter Topic -->
+            <div class="space-y-1.5">
+                <label class="block text-xs font-medium text-slate-300">Chapter Title / Topic</label>
+                <input type="text" id="input-chapter-topic" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-100 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none" placeholder="e.g. Relational Database Design & Normalization">
+            </div>
+
+            <!-- Mode Specific Container 1: Diploma PLOs/CLOs OR Springer Abstract/Keywords -->
+            <div id="container-diploma-outcomes" class="space-y-3">
+                <div class="space-y-1.5">
+                    <div class="flex justify-between items-center">
+                        <label class="block text-xs font-medium text-slate-300">Program Learning Outcomes (PLOs)</label>
+                        <span class="text-[10px] text-slate-500">1 per line</span>
+                    </div>
+                    <textarea id="input-plos" rows="2.5" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-xs text-slate-100 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none font-mono" placeholder="PLO1: Apply core computing principles..."></textarea>
+                </div>
+
+                <div class="space-y-1.5">
+                    <div class="flex justify-between items-center">
+                        <label class="block text-xs font-medium text-slate-300">Course Learning Outcomes (CLOs)</label>
+                        <span class="text-[10px] text-slate-500">1 per line</span>
+                    </div>
+                    <textarea id="input-clos" rows="2.5" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-xs text-slate-100 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none font-mono" placeholder="CLO1: Evaluate database tables..."></textarea>
+                </div>
+            </div>
+
+            <!-- Springer Nature Specific Controls (Hidden in Diploma mode) -->
+            <div id="container-springer-settings" class="hidden space-y-3">
+                <div class="space-y-1.5">
+                    <label class="block text-xs font-medium text-slate-300">Chapter Abstract (Springer Book Standard)</label>
+                    <textarea id="input-abstract" rows="3" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-xs text-slate-100 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 outline-none" placeholder="Enter 150-250 word chapter abstract or leave blank to auto-generate..."></textarea>
+                </div>
+
+                <div class="space-y-1.5">
+                    <label class="block text-xs font-medium text-slate-300">Index Keywords (Comma Separated)</label>
+                    <input type="text" id="input-keywords" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-100 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 outline-none" placeholder="e.g. Relational Model, Functional Dependencies, BCNF, Data Anomaly">
+                </div>
+
+                <!-- Citation Style Config -->
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-[11px] font-medium text-slate-300 mb-1">In-Text Citation Style</label>
+                        <select id="select-citation-style" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2 py-1.5 text-xs text-slate-200 outline-none">
+                            <option value="author-year" selected>Author-Year (Smith et al., 2023)</option>
+                            <option value="numeric">Numeric [1], [2]</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-medium text-slate-300 mb-1">Citation Density</label>
+                        <select id="select-citation-density" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2 py-1.5 text-xs text-slate-200 outline-none">
+                            <option value="standard">Standard (~2-3 per sec)</option>
+                            <option value="dense" selected>Dense Academic (~4-6 per sec)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Page / Scope Settings -->
+            <div class="grid grid-cols-2 gap-3 pt-1">
+                <div>
+                    <label class="block text-xs font-medium text-slate-300 mb-1">Target Page Scope</label>
+                    <select id="select-page-target" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 outline-none">
+                        <option value="15-20" selected>15 – 20 Pages (~5k - 7k words)</option>
+                        <option value="10-15">10 – 15 Pages (~3.5k - 5k words)</option>
+                        <option value="20-25">20 – 25 Pages (~7k - 9k words)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-slate-300 mb-1">Academic Context</label>
+                    <select id="select-diploma-level" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 outline-none">
+                        <option value="Springer Nature Monograph">Springer Nature Monograph</option>
+                        <option value="Advanced Diploma (Level 5)">Advanced Diploma (Level 5)</option>
+                        <option value="Standard Diploma (Level 4)" selected>Standard Diploma (Level 4)</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="pt-2 space-y-2">
+                <button id="btn-generate-syllabus" class="w-full py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-medium text-xs rounded-lg shadow-md transition flex items-center justify-center space-x-2">
+                    <i data-lucide="layout-grid" class="w-4 h-4"></i>
+                    <span>1. Build Structure & Section Matrix</span>
+                </button>
+                
+                <button id="btn-auto-generate-all" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-xs rounded-lg shadow-md transition flex items-center justify-center space-x-2 opacity-50 cursor-not-allowed" disabled>
+                    <i data-lucide="zap" class="w-4 h-4"></i>
+                    <span>2. Generate Complete Chapter (With Citations)</span>
+                </button>
+            </div>
+
+            <!-- Quick Status Alert -->
+            <div id="status-card" class="p-3 bg-slate-950 rounded-lg border border-slate-800 text-xs text-slate-400 space-y-1 mt-auto">
+                <div class="flex items-center justify-between text-slate-300">
+                    <span class="font-semibold flex items-center gap-1.5">
+                        <span id="status-indicator" class="w-2 h-2 rounded-full bg-amber-400 inline-block"></span>
+                        Status
+                    </span>
+                    <span id="status-word-count" class="font-mono text-[11px] text-blue-400">0 words (~0 pages)</span>
+                </div>
+                <p id="status-message" class="text-[11px] text-slate-500">Fill parameters and click "Build Structure & Matrix" to begin.</p>
+            </div>
+
+        </section>
+
+        <!-- Right Workspace Area -->
+        <section class="lg:col-span-8 flex flex-col h-full bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-xl">
+            
+            <!-- Tab Header -->
+            <div class="no-print border-b border-slate-800 bg-slate-950 px-4 py-2 flex items-center justify-between text-xs">
+                <div class="flex space-x-1">
+                    <button id="tab-btn-matrix" class="px-3 py-1.5 rounded-lg font-medium bg-blue-600 text-white flex items-center space-x-1.5 transition">
+                        <i data-lucide="git-fork" class="w-3.5 h-3.5"></i>
+                        <span>Section Outline & Matrix</span>
+                    </button>
+                    <button id="tab-btn-chapter" class="px-3 py-1.5 rounded-lg font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-800 flex items-center space-x-1.5 transition">
+                        <i data-lucide="file-text" class="w-3.5 h-3.5"></i>
+                        <span>Chapter Viewer</span>
+                    </button>
+                </div>
+
+                <!-- Page / Word Progress Tracker -->
+                <div class="flex items-center space-x-4 text-slate-400">
+                    <div class="flex items-center space-x-1">
+                        <i data-lucide="quote" class="w-3.5 h-3.5 text-amber-400"></i>
+                        <span class="text-[11px]">Citations: <strong id="lbl-citation-count" class="text-amber-400">0</strong></span>
+                    </div>
+                    <div class="flex items-center space-x-1">
+                        <i data-lucide="file-check" class="w-3.5 h-3.5 text-slate-500"></i>
+                        <span class="text-[11px]">Pages: <strong id="lbl-est-pages" class="text-blue-400">0 / 18</strong></span>
+                    </div>
+                    <div class="flex items-center space-x-1">
+                        <i data-lucide="bar-chart-2" class="w-3.5 h-3.5 text-slate-500"></i>
+                        <span class="text-[11px]">Words: <strong id="lbl-word-count" class="text-emerald-400">0</strong></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 1: Alignment Matrix & Outline Planner -->
+            <div id="panel-matrix" class="flex-1 p-5 overflow-y-auto space-y-5">
+                
+                <div class="bg-slate-950 p-4 rounded-lg border border-slate-800">
+                    <h3 id="lbl-planner-title" class="text-sm font-semibold text-slate-100 mb-1 flex items-center gap-2">
+                        <i data-lucide="shield-check" class="w-4 h-4 text-emerald-400"></i>
+                        Curriculum Mapping & Section Planner
+                    </h3>
+                    <p id="lbl-planner-desc" class="text-xs text-slate-400">
+                        To guarantee a comprehensive 15–20 page diploma chapter, the generator breaks down the topic into 8 specialized academic sections.
+                    </p>
+                </div>
+
+                <!-- Matrix Table -->
+                <div class="overflow-x-auto border border-slate-800 rounded-lg">
+                    <table class="w-full text-left text-xs text-slate-300">
+                        <thead class="bg-slate-950 text-slate-400 uppercase text-[10px] border-b border-slate-800">
+                            <tr>
+                                <th class="p-3 w-12">Sec #</th>
+                                <th class="p-3">Section Title & Academic Focus</th>
+                                <th class="p-3 w-28">Target Words</th>
+                                <th id="th-mapping" class="p-3 w-36">Mapped Outcomes / Citations</th>
+                                <th class="p-3 w-28 text-center">Status</th>
+                                <th class="p-3 w-28 text-right">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbl-outline-body" class="divide-y divide-slate-800 bg-slate-900/50">
+                            <tr>
+                                <td colspan="6" class="p-8 text-center text-slate-500 italic">
+                                    Click "1. Build Structure & Section Matrix" to generate the detailed 15–20 page chapter outline.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Interactive Controls Tip -->
+                <div class="flex items-center justify-between p-4 bg-slate-950 rounded-lg border border-slate-800 text-xs">
+                    <div class="text-slate-400 flex items-center gap-2">
+                        <i data-lucide="info" class="w-4 h-4 text-blue-400 shrink-0"></i>
+                        <span><strong>Tip:</strong> In Springer Nature Mode, each section includes explicit in-text literature citations and auto-builds a complete reference list in Section 8.</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 2: Full Chapter Content Viewer & Editor -->
+            <div id="panel-chapter" class="hidden flex-1 flex flex-col overflow-hidden bg-slate-950">
+                
+                <!-- Viewer Control Toolbar -->
+                <div class="no-print p-3 bg-slate-900 border-b border-slate-800 flex flex-wrap items-center justify-between gap-2 text-xs">
+                    <div class="flex items-center flex-wrap gap-2">
+                        <label class="flex items-center gap-1.5 cursor-pointer text-slate-300 select-none px-2.5 py-1 bg-slate-950 rounded border border-slate-800 hover:border-slate-700 transition">
+                            <input type="checkbox" id="chk-clean-mode" class="rounded bg-slate-900 border-slate-700 text-emerald-500 focus:ring-0 w-3.5 h-3.5">
+                            <span class="text-[11px] font-semibold text-emerald-400">Clean Mode (Hide Meta Tags)</span>
+                        </label>
+                        <button id="btn-copy-chapter" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 flex items-center gap-1 transition">
+                            <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+                            <span>Copy MD</span>
+                        </button>
+                        <button id="btn-toggle-edit" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 flex items-center gap-1 transition">
+                            <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+                            <span id="lbl-toggle-edit">Edit Markdown</span>
+                        </button>
+                        <button id="btn-export-markdown" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-blue-400 rounded border border-slate-700 flex items-center gap-1 transition">
+                            <i data-lucide="download" class="w-3.5 h-3.5"></i>
+                            <span>Export MD</span>
+                        </button>
+                    </div>
+
+                    <div id="lbl-format-tag" class="text-slate-400 text-[11px] italic">
+                        Standard Academic Formatting: Level 4/5 Diploma
+                    </div>
+                </div>
+
+                <!-- Markdown View Container -->
+                <div id="chapter-rendered-container" class="flex-1 p-6 sm:p-10 overflow-y-auto prose prose-invert prose-blue max-w-none bg-slate-950">
+                    <div class="text-center py-20 text-slate-500 space-y-3">
+                        <i data-lucide="book-open" class="w-12 h-12 mx-auto text-slate-700"></i>
+                        <p class="text-sm">No chapter content generated yet. Build the structure and click generate to populate the textbook chapter.</p>
+                    </div>
+                </div>
+
+                <!-- Editable Textarea (Hidden by default) -->
+                <textarea id="chapter-raw-editor" class="hidden flex-1 p-6 bg-slate-950 text-slate-200 font-mono text-xs outline-none resize-none border-none leading-relaxed" spellcheck="false"></textarea>
+            </div>
+
+        </section>
+    </main>
+
+    <!-- Presets Modal Dialog -->
+    <div id="modal-presets" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-xl max-w-2xl w-full overflow-hidden shadow-2xl flex flex-col max-h-[85vh]">
+            <div class="p-4 bg-slate-950 border-b border-slate-800 flex justify-between items-center">
+                <h3 class="text-sm font-bold text-slate-100 flex items-center gap-2">
+                    <i data-lucide="book-marked" class="w-4 h-4 text-amber-400"></i>
+                    Select Preset Topic & Format
+                </h3>
+                <button id="btn-close-preset-modal" class="text-slate-400 hover:text-white transition">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <div class="p-5 overflow-y-auto space-y-3 text-xs" id="preset-list-container">
+                <!-- Javascript will inject preset items here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const state = {
+            mode: "diploma", // "diploma" | "springer"
+            courseName: "Diploma in Information Technology",
+            chapterTopic: "Relational Database Normalization & SQL Integrity Rules",
+            plos: [
+                "PLO1: Apply core computing principles to design technical software solutions.",
+                "PLO2: Analyze data architecture requirements and enforce data integrity standards.",
+                "PLO3: Execute hands-on database administration and lab exercises."
+            ],
+            clos: [
+                "CLO1: Evaluate database tables against 1NF, 2NF, and 3NF normalization rules.",
+                "CLO2: Construct normalized entity models to eliminate insert, update, and delete anomalies.",
+                "CLO3: Write standard SQL DDL scripts with key constraints."
+            ],
+            abstract: "This chapter provides a comprehensive exploration of database normalization principles and SQL structural integrity enforcement within modern relational data architectures. Beginning with relational algebra foundations, we trace the systematic elimination of insertion, update, and deletion anomalies through normal forms (1NF through BCNF). Worked numerical and architectural examples demonstrate practical schema decomposition.",
+            keywords: "Relational Model, Normalization, Functional Dependencies, BCNF, SQL DDL Constraints",
+            citationStyle: "author-year", // "author-year" | "numeric"
+            citationDensity: "dense",
+            targetPageScope: "15-20",
+            diplomaLevel: "Standard Diploma (Level 4)",
+            apiKey: "",
+            outline: [],
+            chapterSectionsContent: {},
+            isGenerating: false,
+            isCleanMode: false,
+            isEditingMode: false,
+            currentTab: "matrix" // "matrix" | "chapter"
+        };
+
+        const PRESETS = [
+            {
+                mode: "springer",
+                title: "[Springer Nature] Deep Learning in Medical Imaging & AI Diagnostics",
+                courseName: "Springer Series in Bioengineering and Computational Health",
+                chapterTopic: "Deep Convolutional Networks and Transformer Architectures for Diagnostic Radiology",
+                abstract: "This chapter synthesizes recent breakthroughs in deep learning architectures applied to clinical radiology and medical image processing. We examine convolutional neural networks (CNNs), vision transformers (ViTs), and self-supervised learning algorithms deployed for automated tumor detection, lesion segmentation, and multi-modal alignment. In-text literature review and quantitative benchmarking illustrate performance across clinical datasets.",
+                keywords: "Medical Imaging, Vision Transformers, Convolutional Neural Networks, AI Diagnostics, Semantic Segmentation",
+                citationStyle: "author-year"
+            },
+            {
+                mode: "springer",
+                title: "[Springer Nature] Cyber-Physical Power Grids & Smart Energy Systems",
+                courseName: "Springer Tracts in Smart Grid & Sustainable Energy Systems",
+                chapterTopic: "Cyber-Resilient Dynamic State Estimation in Distributed Power Grids",
+                abstract: "As modern electrical grids transition into decentralized cyber-physical systems, securing state estimation algorithms against false data injection attacks (FDIA) becomes paramount. This chapter formulates non-linear dynamic state estimation frameworks using extended Kalman filtering and deep reinforcement learning.",
+                keywords: "Smart Grid, Cyber-Physical Systems, State Estimation, False Data Injection, Kalman Filter",
+                citationStyle: "numeric"
+            },
+            {
+                mode: "diploma",
+                title: "[Diploma Level] Relational Database Normalization & SQL",
+                courseName: "Diploma in Information Technology",
+                chapterTopic: "Relational Database Normalization & SQL Integrity Rules",
+                plos: [
+                    "PLO1: Apply core computing principles to design technical software solutions.",
+                    "PLO2: Analyze data architecture requirements and enforce data integrity standards.",
+                    "PLO3: Execute hands-on database administration and practical lab exercises."
+                ],
+                clos: [
+                    "CLO1: Evaluate unnormalized schemas against 1NF, 2NF, and 3NF rules.",
+                    "CLO2: Resolve data update anomalies through practical schema decomposition.",
+                    "CLO3: Construct SQL DDL scripts with referential key constraints."
+                ]
+            },
+            {
+                mode: "diploma",
+                title: "[Diploma Level] Thermodynamics & Applied Industrial Heat Transfer",
+                courseName: "Diploma in Mechanical Engineering",
+                chapterTopic: "First Law of Thermodynamics & Applied Industrial Heat Transfer",
+                plos: [
+                    "PLO1: Evaluate thermodynamic energy balances in industrial mechanical systems.",
+                    "PLO2: Perform engineering calculations using international unit standards.",
+                    "PLO3: Conduct laboratory testing on heat exchangers and pressure vessels."
+                ],
+                clos: [
+                    "CLO1: Apply the First Law of Thermodynamics to open and closed control volumes.",
+                    "CLO2: Calculate conduction, convection, and radiation heat transfer rates.",
+                    "CLO3: Analyze real-world HVAC system thermal efficiency diagrams."
+                ]
+            }
+        ];
+
+        function showNotification(message, type = "info") {
+            const container = document.getElementById("toast-container");
+            const toast = document.createElement("div");
+            
+            let bgClass = "bg-slate-800 border-slate-700 text-slate-100";
+            let icon = "info";
+            
+            if (type === "success") {
+                bgClass = "bg-emerald-950/90 border-emerald-700 text-emerald-200";
+                icon = "check-circle";
+            } else if (type === "error") {
+                bgClass = "bg-rose-950/90 border-rose-700 text-rose-200";
+                icon = "alert-triangle";
+            } else if (type === "warning") {
+                bgClass = "bg-amber-950/90 border-amber-700 text-amber-200";
+                icon = "alert-circle";
+            }
+
+            toast.className = `p-3.5 rounded-lg border shadow-xl flex items-start space-x-3 pointer-events-auto transition-all transform translate-y-2 opacity-0 text-xs ${bgClass}`;
+            toast.innerHTML = `
+                <i data-lucide="${icon}" class="w-4 h-4 shrink-0 mt-0.5"></i>
+                <div class="flex-1">${message}</div>
+                <button onclick="this.parentElement.remove()" class="text-slate-400 hover:text-white">
+                    <i data-lucide="x" class="w-3.5 h-3.5"></i>
+                </button>
+            `;
+            
+            container.appendChild(toast);
+            lucide.createIcons();
+
+            setTimeout(() => {
+                toast.classList.remove("translate-y-2", "opacity-0");
+            }, 10);
+
+            setTimeout(() => {
+                if (toast.parentElement) {
+                    toast.classList.add("opacity-0");
+                    setTimeout(() => toast.remove(), 300);
+                }
+            }, 4000);
+        }
+
+        async function callGeminiAPI(payload, retries = 2, delay = 1000) {
+            const userApiKey = document.getElementById('input-api-key').value.trim();
+            
+            if (userApiKey) {
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${userApiKey}`;
+                for (let i = 0; i < retries; i++) {
+                    try {
+                        const response = await fetch(apiUrl, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+
+                        if (!response.ok) {
+                            if (response.status === 429 && i < retries - 1) {
+                                await new Promise(r => setTimeout(r, delay * Math.pow(2, i)));
+                                continue;
+                            }
+                            throw new Error(`API status ${response.status}`);
+                        }
+
+                        const result = await response.json();
+                        const text = result?.candidates?.[0]?.content?.parts?.[0]?.text;
+                        if (!text) throw new Error("Empty response payload");
+                        return text;
+                    } catch (err) {
+                        if (i === retries - 1) throw err;
+                        await new Promise(r => setTimeout(r, delay * Math.pow(2, i)));
+                    }
+                }
+            }
+
+            return fallbackGenerator(payload);
+        }
+
+        function fallbackGenerator(payload) {
+            const isJson = payload.generationConfig && payload.generationConfig.responseMimeType === "application/json";
+            
+            if (isJson) {
+                if (state.mode === "springer") {
+                    return JSON.stringify([
+                        {
+                            "sectionNum": 1,
+                            "title": "1. Introduction, Background & Historical Context",
+                            "academicFocus": "Contextual motivation, domain history, literature baseline, and formal problem definition",
+                            "targetWords": 850,
+                            "mappedPLOs": ["Lit. Review"],
+                            "mappedCLOs": ["Background"]
+                        },
+                        {
+                            "sectionNum": 2,
+                            "title": "2. Theoretical Foundations & Structural Framework",
+                            "academicFocus": "Formal mathematical definitions, fundamental principles, standard theorems, and taxonomy",
+                            "targetWords": 900,
+                            "mappedPLOs": ["Theory"],
+                            "mappedCLOs": ["Formulations"]
+                        },
+                        {
+                            "sectionNum": 3,
+                            "title": "3. State-of-the-Art System Architecture & Methodology",
+                            "academicFocus": "Algorithmic pipelines, system diagrams, structural specifications, and protocol design",
+                            "targetWords": 950,
+                            "mappedPLOs": ["Architecture"],
+                            "mappedCLOs": ["Methodology"]
+                        },
+                        {
+                            "sectionNum": 4,
+                            "title": "4. Step-by-Step Analytical Proofs & Mathematical Model",
+                            "academicFocus": "Exhaustive derivation, calculated execution proofs, and algorithmic complexity analysis",
+                            "targetWords": 900,
+                            "mappedPLOs": ["Proof/Math"],
+                            "mappedCLOs": ["Derivations"]
+                        },
+                        {
+                            "sectionNum": 5,
+                            "title": "5. Empirical Evaluation, Benchmarking & Results",
+                            "academicFocus": "Comparative analysis against existing state-of-the-art baselines, tables, and performance metrics",
+                            "targetWords": 850,
+                            "mappedPLOs": ["Empirical"],
+                            "mappedCLOs": ["Benchmark"]
+                        },
+                        {
+                            "sectionNum": 6,
+                            "title": "6. Industrial Monograph Case Study & Practical Implementation",
+                            "academicFocus": "Real-world commercial or industrial deployment, trade-offs, and scaling bottlenecks",
+                            "targetWords": 850,
+                            "mappedPLOs": ["Industrial"],
+                            "mappedCLOs": ["Case Study"]
+                        },
+                        {
+                            "sectionNum": 7,
+                            "title": "7. Critical Open Challenges & Future Directions",
+                            "academicFocus": "Limitation analysis, security/scalability gaps, emerging research frontiers",
+                            "targetWords": 700,
+                            "mappedPLOs": ["Open Problems"],
+                            "mappedCLOs": ["Future Scope"]
+                        },
+                        {
+                            "sectionNum": 8,
+                            "title": "8. Chapter Conclusion & Comprehensive Bibliography",
+                            "academicFocus": "Synthesized conclusions, takeaway summary, and complete Springer Nature format references list",
+                            "targetWords": 750,
+                            "mappedPLOs": ["Synthesis"],
+                            "mappedCLOs": ["References"]
+                        }
+                    ]);
+                } else {
+                    return JSON.stringify([
+                        {
+                            "sectionNum": 1,
+                            "title": "1. Fundamental Concepts & Theoretical Foundation",
+                            "academicFocus": "Core principles, terminology, historical context, and foundational theories",
+                            "targetWords": 750,
+                            "mappedPLOs": [state.plos[0] ? state.plos[0].split(':')[0] : "PLO1"],
+                            "mappedCLOs": [state.clos[0] ? state.clos[0].split(':')[0] : "CLO1"]
+                        },
+                        {
+                            "sectionNum": 2,
+                            "title": "2. Structural Framework & Technical Standards",
+                            "academicFocus": "Technical specifications, rules, mathematical/structural formulations",
+                            "targetWords": 850,
+                            "mappedPLOs": [state.plos[1] ? state.plos[1].split(':')[0] : "PLO2"],
+                            "mappedCLOs": [state.clos[0] ? state.clos[0].split(':')[0] : "CLO1", state.clos[1] ? state.clos[1].split(':')[0] : "CLO2"]
+                        },
+                        {
+                            "sectionNum": 3,
+                            "title": "3. Step-by-Step Analytical Process & Methodologies",
+                            "academicFocus": "Procedural workflows, algorithmic steps, and systematic evaluation methods",
+                            "targetWords": 800,
+                            "mappedPLOs": [state.plos[0] ? state.plos[0].split(':')[0] : "PLO1"],
+                            "mappedCLOs": [state.clos[1] ? state.clos[1].split(':')[0] : "CLO2"]
+                        },
+                        {
+                            "sectionNum": 4,
+                            "title": "4. Fully Worked Step-by-Step Practical Examples",
+                            "academicFocus": "Comprehensive end-to-end calculated solutions with detailed explanation notes",
+                            "targetWords": 900,
+                            "mappedPLOs": [state.plos[1] ? state.plos[1].split(':')[0] : "PLO2"],
+                            "mappedCLOs": [state.clos[1] ? state.clos[1].split(':')[0] : "CLO2", state.clos[2] ? state.clos[2].split(':')[0] : "CLO3"]
+                        },
+                        {
+                            "sectionNum": 5,
+                            "title": "5. Industrial Applications & Practical Case Study",
+                            "academicFocus": "Real-world engineering or business implementation scenario with trade-offs",
+                            "targetWords": 850,
+                            "mappedPLOs": [state.plos[2] ? state.plos[2].split(':')[0] : "PLO3"],
+                            "mappedCLOs": [state.clos[2] ? state.clos[2].split(':')[0] : "CLO3"]
+                        },
+                        {
+                            "sectionNum": 6,
+                            "title": "6. Guided Laboratory & Workshop Practical Exercises",
+                            "academicFocus": "Hands-on lab manual format with procedure, apparatus, and verification steps",
+                            "targetWords": 800,
+                            "mappedPLOs": [state.plos[2] ? state.plos[2].split(':')[0] : "PLO3"],
+                            "mappedCLOs": [state.clos[2] ? state.clos[2].split(':')[0] : "CLO3"]
+                        },
+                        {
+                            "sectionNum": 7,
+                            "title": "7. Comprehensive Assessment: Review Questions & MCQs",
+                            "academicFocus": "Descriptive review questions, problem sets, and 10 multiple-choice questions with answer key",
+                            "targetWords": 750,
+                            "mappedPLOs": [state.plos[0] ? state.plos[0].split(':')[0] : "PLO1", state.plos[1] ? state.plos[1].split(':')[0] : "PLO2"],
+                            "mappedCLOs": [state.clos[0] ? state.clos[0].split(':')[0] : "CLO1", state.clos[1] ? state.clos[1].split(':')[0] : "CLO2"]
+                        },
+                        {
+                            "sectionNum": 8,
+                            "title": "8. Academic Summary, Key Formulas & Technical Glossary",
+                            "academicFocus": "Chapter wrap-up summary, standard reference table, and domain terminology definitions",
+                            "targetWords": 600,
+                            "mappedPLOs": [state.plos[0] ? state.plos[0].split(':')[0] : "PLO1"],
+                            "mappedCLOs": [state.clos[0] ? state.clos[0].split(':')[0] : "CLO1"]
+                        }
+                    ]);
+                }
+            }
+
+            // Text section generator fallback
+            const promptText = payload.contents?.[0]?.parts?.[0]?.text || "";
+            const match = promptText.match(/Section (\d+): ([^\n]+)/);
+            const secNum = match ? match[1] : "1";
+            const secTitle = match ? match[2] : "Academic Section Overview";
+
+            const isSpringer = state.mode === "springer";
+            const isNumeric = state.citationStyle === "numeric";
+
+            const cite1 = isNumeric ? "[1]" : "(Vaswani et al., 2017)";
+            const cite2 = isNumeric ? "[2]" : "(Codd, 1970)";
+            const cite3 = isNumeric ? "[3]" : "(Chen & Liu, 2022)";
+            const cite4 = isNumeric ? "[4]" : "(Goodfellow et al., 2016)";
+
+            if (isSpringer && secNum === "8") {
+                return `# Section 8: ${secTitle}
+
+## 1. Chapter Summary and Concluding Synthesis
+This book chapter has systematically explored the theoretical foundations, implementation mechanisms, and practical benchmarks surrounding **${state.chapterTopic}**. By integrating formal frameworks with rigorous engineering analysis ${cite1}, we have demonstrated how system performance and data integrity can be optimized.
+
+---
+
+## References
+
+1. **Codd, E.F.** (1970). A relational model of data for large shared data banks. *Communications of the ACM*, 13(6), 377–387. https://doi.org/10.1145/362384.362685
+2. **Vaswani, A., Shazeer, N., Parmar, N., Uszkoreit, J., Jones, L., Gomez, A.N., Kaiser, Ł., & Polosukhin, I.** (2017). Attention is all you need. In *Advances in Neural Information Processing Systems* (pp. 5998–6008).
+3. **Chen, H., & Liu, X.** (2022). High-throughput data architecture and normalization protocols in cyber-physical networks. *IEEE Transactions on Knowledge and Data Engineering*, 34(8), 3912–3925.
+4. **Goodfellow, I., Bengio, Y., & Courville, A.** (2016). *Deep Learning*. MIT Press. Cambridge, MA.
+5. **Springer Nature Editorial Board** (2024). *Standard Guidelines for Monographs and Contributed Volumes*. Springer Nature Publishing. Berlin, Heidelberg.`;
+            }
+
+            return `# Section ${secNum}: ${secTitle}
+
+${isSpringer ? `> **Publisher Standard:** Springer Nature Monograph | **Citation Format:** ${state.citationStyle.toUpperCase()}` : `> **Mapped PLO:** ${state.plos[secNum % state.plos.length] || 'PLO1'} | **Mapped CLO:** ${state.clos[secNum % state.clos.length] || 'CLO1'}`}
+
+## 1. Overview and Theoretical Framework
+This section provides an exhaustive academic exposition on **${state.chapterTopic}** within the scope of **${state.courseName}**. Early landmark literature established that foundational progress in this domain relies heavily upon structured mathematical formulation and empirical validation ${cite2}. Recent advancements by ${cite3} have further expanded this model to address large-scale distributed deployments.
+
+### 1.1 Core Conceptual Framework
+In contemporary research literature ${cite1}, mastering ${state.chapterTopic} requires a disciplined three-tier methodology:
+
+1. **Theoretical Formalism:** Establishing mathematically sound proofs and operational boundaries ${cite4}.
+2. **Structural Standardization:** Adhering strictly to international publishing and technical specifications (ISO/IEEE).
+3. **Empirical Optimization:** Validating throughput, latency, and resilience under production workloads.
+
+> **Key Rule / Theorem:**
+> "Optimal architectural resilience in ${state.chapterTopic} is guaranteed when operational dependencies are fully decoupled and normalized ${cite2}."
+
+---
+
+## 2. Technical In-Depth Analysis
+
+| Parameter / Dimension | Benchmark Specification | Literature Baseline | Publishing Context |
+| :--- | :--- | :--- | :--- |
+| **Model Standard** | ISO/IEC / IEEE Standard | ${cite1} | Springer Monograph |
+| **Throughput Target** | Sub-10ms latency | ${cite3} | Production Systems |
+| **Integrity Level** | Level 4/5 Compliance | ${cite2} | High-Reliability Systems |
+
+### 2.1 Step-by-Step Analytical Methodology
+To execute the required structural verification, adhere to the following standard 4-step research workflow:
+
+\`\`\`text
+Step 1: Baseline Formulations -> Step 2: Anomaly Auditing -> Step 3: Structural Refactoring -> Step 4: Empirical Benchmark
+\`\`\`
+
+1. **Formulate Input Conditions:** Record state space equations and unnormalized parameters.
+2. **Identify Structural Anomalies:** Audit insertion, update, or deletion edge cases ${cite4}.
+3. **Apply Decomposition Operators:** Split complex structures into verified sub-components ${cite3}.
+4. **Enforce Referential Safeguards:** Verify primary key constraints and operational guarantees.
+
+---
+
+## 3. Case Study & Empirical Verification Exercise
+
+### Research Objective
+Demonstrate empirical performance metrics for **${state.chapterTopic}** across simulated real-world conditions.
+
+### Tooling & Benchmark Environment
+* **Platform Framework:** Enterprise Analytical Suite / Matlab / PyTorch
+* **Data Corpus:** Standardized Monograph Benchmark Dataset
+* **Evaluation Target:** Compliance with ${isSpringer ? 'Springer Nature Book Standards' : state.clos[0] || 'CLO1'}
+
+---
+
+## 4. Section Review Questions
+
+1. Analyze the mathematical conditions under which the formulation proposed by ${cite2} supersedes traditional techniques.
+2. Describe how enforcing ${isSpringer ? 'citation rigor' : state.plos[0] || 'PLO1'} mitigates operational failure risks in production environments.
+3. **Multiple Choice Question:** Which foundational principle was introduced in ${cite1}?
+   - A) Denormalization constraint
+   - B) Atomic attribute decomposition *(Correct)*
+   - C) Non-linear dynamic scaling
+   - D) Heuristic search pruning`;
+        }
+
+        async function generateOutlineAndMatrix() {
+            updateInputsFromUI();
+            
+            if (!state.courseName || !state.chapterTopic) {
+                showNotification("Please specify the Book/Course Title and Chapter Topic.", "warning");
+                return;
+            }
+
+            setLoadingState(true, `Building comprehensive 15-20 page ${state.mode === "springer" ? "Springer Nature" : "Diploma"} syllabus matrix...`);
+
+            const isSpringer = state.mode === "springer";
+
+            const systemInstruction = isSpringer ? 
+                `You are a Senior Editor and Lead Author for Springer Nature Academic Books and Monographs.
+Your task is to structure an 8-section research monograph book chapter designed to yield a comprehensive 15–20 page (5,000 to 7,000 words) academic output with rigorous literature review and citation density.
+
+Generate a JSON response representing 8 distinct chapter sections.
+Return ONLY valid JSON matching this structure:
+[
+  {
+    "sectionNum": 1,
+    "title": "Section Title Here",
+    "academicFocus": "Core research description and theoretical coverage",
+    "targetWords": 850,
+    "mappedPLOs": ["Lit. Review"],
+    "mappedCLOs": ["Foundations"]
+  }
+]` :
+                `You are a Senior Academic Dean and Curriculum Architect in Technical Education.
+Your task is to structure a detailed 8-section diploma textbook chapter mapped precisely to PLOs and CLOs.
+
+Generate a JSON response representing 8 distinct chapter sections.
+Return ONLY valid JSON matching this structure:
+[
+  {
+    "sectionNum": 1,
+    "title": "Section Title Here",
+    "academicFocus": "Core description of depth, theories, and concepts covered",
+    "targetWords": 800,
+    "mappedPLOs": ["PLO1"],
+    "mappedCLOs": ["CLO1", "CLO2"]
+  }
+]`;
+
+            const prompt = `Publisher Format Mode: ${isSpringer ? 'Springer Nature Academic Monograph Book Chapter' : 'Diploma TVET Curriculum'}
+Book / Subject Title: ${state.courseName}
+Chapter Title: ${state.chapterTopic}
+Target Page Scope: ${state.targetPageScope} Pages
+${isSpringer ? `Abstract: ${state.abstract}\nKeywords: ${state.keywords}\nCitation Style: ${state.citationStyle}` : `PLOs:\n${state.plos.join('\n')}\nCLOs:\n${state.clos.join('\n')}`}
+
+Requirement: Create 8 comprehensive sections covering full background, theory, system architecture, step-by-step proofs, empirical benchmarks, case study, future directions, and conclusion/references.`;
+
+            try {
+                const payload = {
+                    contents: [{ parts: [{ text: prompt }] }],
+                    systemInstruction: { parts: [{ text: systemInstruction }] },
+                    generationConfig: {
+                        responseMimeType: "application/json",
+                        temperature: 0.2
+                    }
+                };
+
+                const rawJson = await callGeminiAPI(payload);
+                state.outline = JSON.parse(rawJson);
+                state.chapterSectionsContent = {};
+
+                renderOutlineTable();
+                updateStatsUI();
+                
+                const btnAuto = document.getElementById('btn-auto-generate-all');
+                btnAuto.disabled = false;
+                btnAuto.classList.remove('opacity-50', 'cursor-not-allowed');
+
+                setLoadingState(false, "Outline and Section Matrix generated! You can now generate full chapter content.");
+                showNotification("Curriculum outline and section matrix successfully compiled!", "success");
+            } catch (err) {
+                console.error("Failed to generate outline:", err);
+                setLoadingState(false, `Error generating outline: ${err.message}`);
+                showNotification("Failed to build outline. Check API key or inputs.", "error");
+            }
+        }
+
+        async function generateSingleSection(index) {
+            if (!state.outline[index]) return;
+            const sec = state.outline[index];
+
+            setLoadingState(true, `Authoring Section ${sec.sectionNum}: ${sec.title}...`);
+
+            const isSpringer = state.mode === "springer";
+
+            const systemInstruction = isSpringer ?
+                `You are a Senior Author for Springer Nature Academic Books. You write dense, highly technical, authoritative monograph chapters with in-text literature citations.
+Style guidelines:
+- In-text citation format: ${state.citationStyle === 'numeric' ? 'Numeric superscript/bracket style like [1], [2], [3]' : 'Author-Year format like (Vaswani et al., 2017) or Smith and Jones (2021)'}.
+- High academic word density (~750-1,000 words per section).
+- Formal academic subheadings (###), equations, comparative tables, and literature references.
+${sec.sectionNum === 8 ? '- Crucial: Include a full "## References" section at the end of Section 8 formatted according to Springer Nature style with complete metadata (Authors, Year, Title, Journal/Publisher, DOI/URL).' : ''}` :
+                `You are a distinguished Diploma Level Textbook Author. You write exceptionally rich, detailed, rigorous, and practical textbook chapters tailored for vocational and technical students (Level 4-5).
+- Deep explanatory paragraphs with technical context.
+- High word density (~750 to 1,000 words per section).`;
+
+            const prompt = `Publisher Mode: ${isSpringer ? 'Springer Nature Academic Monograph Chapter' : 'Diploma Level Textbook'}
+Book / Subject: ${state.courseName}
+Chapter Topic: ${state.chapterTopic}
+
+Section Number: ${sec.sectionNum}
+Section Title: ${sec.title}
+Academic Focus: ${sec.academicFocus}
+Target Word Count: ${sec.targetWords} words
+${isSpringer ? `Citation Style: ${state.citationStyle}` : `Mapped PLOs: ${sec.mappedPLOs.join(', ')}\nMapped CLOs: ${sec.mappedCLOs.join(', ')}`}
+
+Instructions:
+1. Write exhaustive, high-density textbook content for this section. Do NOT write brief summaries.
+2. Ensure plentiful in-text citations throughout the narrative ${isSpringer ? `using ${state.citationStyle} style` : ''}.
+3. Section 8 MUST include a full References list formatted for Springer Nature.`;
+
+            try {
+                const payload = {
+                    contents: [{ parts: [{ text: prompt }] }],
+                    systemInstruction: { parts: [{ text: systemInstruction }] },
+                    generationConfig: {
+                        temperature: 0.3
+                    }
+                };
+
+                const content = await callGeminiAPI(payload);
+                state.chapterSectionsContent[index] = content;
+
+                renderOutlineTable();
+                renderChapterViewer();
+                updateStatsUI();
+
+                setLoadingState(false, `Section ${sec.sectionNum} authored successfully!`);
+                showNotification(`Section ${sec.sectionNum} generated successfully!`, "success");
+            } catch (err) {
+                console.error(`Error generating section ${sec.sectionNum}:`, err);
+                setLoadingState(false, `Failed generating Section ${sec.sectionNum}: ${err.message}`);
+                showNotification(`Error authoring section ${sec.sectionNum}`, "error");
+            }
+        }
+
+        async function generateAllSections() {
+            if (!state.outline || state.outline.length === 0) {
+                showNotification("Please generate the outline matrix first.", "warning");
+                return;
+            }
+
+            state.isGenerating = true;
+            showNotification(`Starting automated generation of all 8 ${state.mode === "springer" ? "Springer Nature" : "Diploma"} chapter sections...`, "info");
+
+            for (let i = 0; i < state.outline.length; i++) {
+                await generateSingleSection(i);
+            }
+
+            state.isGenerating = false;
+            switchTab("chapter");
+            showNotification("Complete 15-20 page chapter generated with citations!", "success");
+        }
+
+        function renderOutlineTable() {
+            const tbody = document.getElementById('tbl-outline-body');
+            if (!state.outline || state.outline.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="p-8 text-center text-slate-500 italic">
+                            Click "1. Build Structure & Section Matrix" to generate the detailed 15–20 page chapter outline.
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = state.outline.map((sec, idx) => {
+                const isDone = !!state.chapterSectionsContent[idx];
+                const mappedPlos = Array.isArray(sec.mappedPLOs) ? sec.mappedPLOs.join(', ') : sec.mappedPLOs;
+                const mappedClos = Array.isArray(sec.mappedCLOs) ? sec.mappedCLOs.join(', ') : sec.mappedCLOs;
+
+                return `
+                    <tr class="hover:bg-slate-800/50 transition">
+                        <td class="p-3 font-mono font-bold text-blue-400 text-center">${sec.sectionNum}</td>
+                        <td class="p-3 space-y-0.5">
+                            <div class="font-semibold text-slate-100">${sec.title}</div>
+                            <div class="text-[11px] text-slate-400 line-clamp-1">${sec.academicFocus}</div>
+                        </td>
+                        <td class="p-3 font-mono text-slate-300 text-xs">${sec.targetWords} w</td>
+                        <td class="p-3 space-y-1">
+                            <span class="inline-block px-1.5 py-0.5 bg-blue-950 text-blue-300 rounded border border-blue-800 text-[10px] font-mono">${mappedPlos}</span>
+                            <span class="inline-block px-1.5 py-0.5 bg-emerald-950 text-emerald-300 rounded border border-emerald-800 text-[10px] font-mono">${mappedClos}</span>
+                        </td>
+                        <td class="p-3 text-center">
+                            ${isDone ? 
+                                `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] bg-emerald-900/60 text-emerald-300 border border-emerald-700/50"><i data-lucide="check" class="w-3 h-3"></i> Ready</span>` : 
+                                `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] bg-slate-800 text-slate-400 border border-slate-700">Pending</span>`
+                            }
+                        </td>
+                        <td class="p-3 text-right">
+                            <button onclick="generateSingleSection(${idx})" class="px-2.5 py-1 text-[11px] font-medium bg-slate-800 hover:bg-blue-600 text-slate-200 hover:text-white rounded border border-slate-700 transition">
+                                ${isDone ? 'Regenerate' : 'Generate'}
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+
+            lucide.createIcons();
+        }
+
+        function getCompiledMarkdown(cleanMode = false) {
+            if (!state.outline || state.outline.length === 0) return "";
+
+            let fullMd = `# ${state.courseName.toUpperCase()}\n`;
+            fullMd += `## ${state.mode === "springer" ? "Springer Nature Chapter" : "Module Chapter"}: ${state.chapterTopic}\n`;
+            fullMd += `**Publishing Target:** ${state.mode === "springer" ? "Springer Nature Monograph / Contributed Volume" : state.diplomaLevel} | **Scope:** ${state.targetPageScope} Pages\n\n`;
+
+            if (state.mode === "springer" && state.abstract) {
+                fullMd += `### Abstract\n${state.abstract}\n\n`;
+                fullMd += `**Keywords:** ${state.keywords}\n\n---\n\n`;
+            } else if (!cleanMode) {
+                fullMd += `### Curriculum Alignment Matrix\n`;
+                fullMd += `**Program Learning Outcomes (PLOs):**\n`;
+                state.plos.forEach(p => fullMd += `- ${p}\n`);
+                fullMd += `\n**Course Learning Outcomes (CLOs):**\n`;
+                state.clos.forEach(c => fullMd += `- ${c}\n`);
+                fullMd += `\n---\n\n`;
+            }
+
+            state.outline.forEach((sec, idx) => {
+                let content = state.chapterSectionsContent[idx] || `*Section ${sec.sectionNum}: Content Pending Generation...*\n\n`;
+                
+                if (cleanMode) {
+                    content = content.replace(/^>\s*\*\*(Mapped PLO|Publisher Standard):\*\*.*$/gm, '');
+                }
+
+                fullMd += `${content}\n\n---\n\n`;
+            });
+
+            return fullMd;
+        }
+
+        function renderChapterViewer() {
+            const container = document.getElementById('chapter-rendered-container');
+            const editor = document.getElementById('chapter-raw-editor');
+            const cleanMode = document.getElementById('chk-clean-mode').checked;
+
+            const mdText = getCompiledMarkdown(cleanMode);
+
+            if (!mdText.trim() || Object.keys(state.chapterSectionsContent).length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-20 text-slate-500 space-y-3">
+                        <i data-lucide="book-open" class="w-12 h-12 mx-auto text-slate-700"></i>
+                        <p class="text-sm">No chapter content generated yet. Build the structure and click generate to populate the textbook chapter.</p>
+                    </div>
+                `;
+                editor.value = "";
+                lucide.createIcons();
+                return;
+            }
+
+            container.innerHTML = marked.parse(mdText);
+            editor.value = mdText;
+        }
+
+        function updateStatsUI() {
+            let totalWords = 0;
+            let totalCitations = 0;
+
+            Object.values(state.chapterSectionsContent).forEach(text => {
+                if (text) {
+                    const words = text.trim().split(/\s+/).filter(w => w.length > 0).length;
+                    totalWords += words;
+
+                    // Match citations like (Author, Year) or [1]
+                    const authorYearMatches = text.match(/\([A-Z][a-zA-L\s&]+(?:et\sal\.)?,\s*\d{4}\)/g) || [];
+                    const numericMatches = text.match(/\[\d+\]/g) || [];
+                    totalCitations += (authorYearMatches.length + numericMatches.length);
+                }
+            });
+
+            const estPages = Math.round((totalWords / 350) * 10) / 10;
+
+            document.getElementById('lbl-word-count').innerText = totalWords.toLocaleString();
+            document.getElementById('lbl-est-pages').innerText = `${estPages} / 18`;
+            document.getElementById('lbl-citation-count').innerText = totalCitations;
+            document.getElementById('status-word-count').innerText = `${totalWords.toLocaleString()} words (~${estPages} pages)`;
+        }
+
+        function setLoadingState(isLoading, message = "") {
+            const indicator = document.getElementById('status-indicator');
+            const msgLabel = document.getElementById('status-message');
+
+            if (isLoading) {
+                indicator.className = "w-2 h-2 rounded-full bg-blue-500 animate-ping inline-block";
+                msgLabel.innerText = message || "Processing AI model output...";
+            } else {
+                indicator.className = "w-2 h-2 rounded-full bg-emerald-400 inline-block";
+                msgLabel.innerText = message || "Ready.";
+            }
+        }
+
+        function switchTab(tabName) {
+            state.currentTab = tabName;
+            const btnMatrix = document.getElementById('tab-btn-matrix');
+            const btnChapter = document.getElementById('tab-btn-chapter');
+            const panelMatrix = document.getElementById('panel-matrix');
+            const panelChapter = document.getElementById('panel-chapter');
+
+            if (tabName === 'matrix') {
+                btnMatrix.className = "px-3 py-1.5 rounded-lg font-medium bg-blue-600 text-white flex items-center space-x-1.5 transition";
+                btnChapter.className = "px-3 py-1.5 rounded-lg font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-800 flex items-center space-x-1.5 transition";
+                panelMatrix.classList.remove('hidden');
+                panelChapter.classList.add('hidden');
+            } else {
+                btnChapter.className = "px-3 py-1.5 rounded-lg font-medium bg-blue-600 text-white flex items-center space-x-1.5 transition";
+                btnMatrix.className = "px-3 py-1.5 rounded-lg font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-800 flex items-center space-x-1.5 transition";
+                panelChapter.classList.remove('hidden');
+                panelMatrix.classList.add('hidden');
+                renderChapterViewer();
+            }
+        }
+
+        function setPublisherMode(mode) {
+            state.mode = mode;
+            const btnDiploma = document.getElementById('btn-mode-diploma');
+            const btnSpringer = document.getElementById('btn-mode-springer');
+            const badgeMode = document.getElementById('badge-mode');
+            const formatBadge = document.getElementById('lbl-format-badge');
+            const formatTag = document.getElementById('lbl-format-tag');
+            const headerIcon = document.getElementById('header-icon-box');
+            const lblBookCourse = document.getElementById('lbl-book-course');
+
+            const containerDiploma = document.getElementById('container-diploma-outcomes');
+            const containerSpringer = document.getElementById('container-springer-settings');
+            const plannerTitle = document.getElementById('lbl-planner-title');
+            const plannerDesc = document.getElementById('lbl-planner-desc');
+
+            if (mode === "springer") {
+                btnSpringer.className = "flex-1 py-1.5 px-2 rounded-md font-medium text-center transition bg-amber-600 text-white shadow";
+                btnDiploma.className = "flex-1 py-1.5 px-2 rounded-md font-medium text-slate-400 hover:text-white text-center transition";
+                badgeMode.className = "text-[10px] uppercase font-bold px-2 py-0.5 rounded bg-amber-950 text-amber-300 border border-amber-700";
+                badgeMode.innerText = "Springer Nature Mode";
+                formatBadge.innerText = "Springer Book Monograph";
+                formatBadge.className = "text-[10px] bg-amber-950 text-amber-300 px-2 py-0.5 rounded border border-amber-700/50";
+                formatTag.innerText = "Springer Nature Academic Book Standard (In-Text Citations & References)";
+                headerIcon.className = "p-2 bg-amber-600/20 text-amber-400 rounded-lg border border-amber-500/30 transition-colors";
+                lblBookCourse.innerText = "Book Series / Springer Subject";
+
+                containerDiploma.classList.add('hidden');
+                containerSpringer.classList.remove('hidden');
+
+                plannerTitle.innerHTML = `<i data-lucide="book-open" class="w-4 h-4 text-amber-400"></i> Springer Nature Monograph Section Architecture`;
+                plannerDesc.innerText = "Book chapters are structured into 8 academic research sections with built-in literature citation targets and automated bibliography generation.";
+            } else {
+                btnDiploma.className = "flex-1 py-1.5 px-2 rounded-md font-medium text-center transition bg-blue-600 text-white shadow";
+                btnSpringer.className = "flex-1 py-1.5 px-2 rounded-md font-medium text-slate-400 hover:text-white text-center transition";
+                badgeMode.className = "text-[10px] uppercase font-bold px-2 py-0.5 rounded bg-blue-900/80 text-blue-300 border border-blue-700";
+                badgeMode.innerText = "Diploma Mode";
+                formatBadge.innerText = "Level 4/5 TVET";
+                formatBadge.className = "text-[10px] bg-blue-900/60 text-blue-300 px-2 py-0.5 rounded border border-blue-700/50";
+                formatTag.innerText = "Standard Academic Formatting: Level 4/5 Diploma";
+                headerIcon.className = "p-2 bg-blue-600/20 text-blue-400 rounded-lg border border-blue-500/30 transition-colors";
+                lblBookCourse.innerText = "Course / Subject Name";
+
+                containerSpringer.classList.add('hidden');
+                containerDiploma.classList.remove('hidden');
+
+                plannerTitle.innerHTML = `<i data-lucide="shield-check" class="w-4 h-4 text-emerald-400"></i> Curriculum Mapping & Section Planner`;
+                plannerDesc.innerText = "To guarantee a comprehensive 15–20 page diploma chapter, the generator breaks down the topic into 8 specialized academic sections.";
+            }
+
+            lucide.createIcons();
+            if (state.outline.length > 0) renderOutlineTable();
+        }
+
+        function toggleEditMode() {
+            state.isEditingMode = !state.isEditingMode;
+            const container = document.getElementById('chapter-rendered-container');
+            const editor = document.getElementById('chapter-raw-editor');
+            const lbl = document.getElementById('lbl-toggle-edit');
+
+            if (state.isEditingMode) {
+                container.classList.add('hidden');
+                editor.classList.remove('hidden');
+                lbl.innerText = "View Formatted";
+            } else {
+                editor.classList.add('hidden');
+                container.classList.remove('hidden');
+                lbl.innerText = "Edit Markdown";
+                const editedMd = editor.value;
+                if (editedMd) {
+                    container.innerHTML = marked.parse(editedMd);
+                }
+            }
+        }
+
+        function updateInputsFromUI() {
+            state.courseName = document.getElementById('input-course-name').value.trim();
+            state.chapterTopic = document.getElementById('input-chapter-topic').value.trim();
+            state.abstract = document.getElementById('input-abstract').value.trim();
+            state.keywords = document.getElementById('input-keywords').value.trim();
+            state.citationStyle = document.getElementById('select-citation-style').value;
+            state.targetPageScope = document.getElementById('select-page-target').value;
+            state.diplomaLevel = document.getElementById('select-diploma-level').value;
+            
+            const rawPlos = document.getElementById('input-plos').value.split('\n').map(s => s.trim()).filter(Boolean);
+            const rawClos = document.getElementById('input-clos').value.split('\n').map(s => s.trim()).filter(Boolean);
+            
+            if (rawPlos.length > 0) state.plos = rawPlos;
+            if (rawClos.length > 0) state.clos = rawClos;
+        }
+
+        function exportLaTeX() {
+            const md = getCompiledMarkdown(true);
+            if (!md) {
+                showNotification("No content available to export.", "warning");
+                return;
+            }
+
+            let texContent = `% Springer Nature Monograph Chapter Source
+\\documentclass{svmult}
+\\usepackage{mathptmx}
+\\usepackage{helvet}
+\\usepackage{courier}
+\\usepackage{graphicx}
+\\usepackage{multicol}
+\\usepackage[bottom]{footmisc}
+
+\\title*{${state.chapterTopic}}
+\\author{Academic Monograph Contributor}
+\\institute{Academic Publishing Studio}
+
+\\begin{document}
+\\maketitle
+
+\\abstract{${state.abstract || 'Chapter abstract placeholder.'}}
+
+`;
+            // Simple conversions for LaTeX headers
+            let cleanTex = md.replace(/^# (.*$)/gim, '\\chapter{$1}')
+                             .replace(/^## (.*$)/gim, '\\section{$1}')
+                             .replace(/^### (.*$)/gim, '\\subsection{$1}');
+            
+            texContent += cleanTex;
+            texContent += `\n\\end{document}`;
+
+            const blob = new Blob([texContent], { type: 'text/x-tex;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${state.chapterTopic.replace(/[^a-z0-9]/gi, '_')}_Springer.tex`;
+            a.click();
+            URL.revokeObjectURL(url);
+            showNotification("Springer Nature LaTeX source (.tex) exported!", "success");
+        }
+
+        function exportMarkdown() {
+            const md = getCompiledMarkdown(document.getElementById('chk-clean-mode').checked);
+            if (!md) {
+                showNotification("No content available to export.", "warning");
+                return;
+            }
+
+            const blob = new Blob([md], { type: 'text/markdown;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${state.courseName.replace(/[^a-z0-9]/gi, '_')}_Chapter.md`;
+            a.click();
+            URL.revokeObjectURL(url);
+            showNotification("Markdown document exported successfully!", "success");
+        }
+
+        function exportWordDoc() {
+            const md = getCompiledMarkdown(document.getElementById('chk-clean-mode').checked);
+            if (!md) {
+                showNotification("No content available to export.", "warning");
+                return;
+            }
+
+            const htmlBody = marked.parse(md);
+
+            const docHtml = `
+                <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+                <head>
+                    <meta charset='utf-8'>
+                    <title>${state.chapterTopic}</title>
+                    <style>
+                        body { font-family: 'Georgia', 'Calibri', serif; font-size: 11pt; line-height: 1.6; color: #111827; }
+                        h1 { font-size: 22pt; color: #9a3412; border-bottom: 2pt solid #9a3412; padding-bottom: 4pt; margin-top: 18pt; }
+                        h2 { font-size: 16pt; color: #1e3a8a; margin-top: 14pt; }
+                        h3 { font-size: 12pt; color: #374151; margin-top: 10pt; }
+                        table { width: 100%; border-collapse: collapse; margin-top: 12pt; margin-bottom: 12pt; }
+                        th, td { border: 1pt solid #cbd5e1; padding: 6pt 8pt; text-align: left; }
+                        th { background-color: #f1f5f9; font-weight: bold; color: #0f172a; }
+                        blockquote { border-left: 3pt solid #ea580c; background: #fff7ed; padding: 6pt 10pt; margin: 8pt 0; color: #9a3412; }
+                        pre { background: #f1f5f9; border: 1pt solid #cbd5e1; padding: 8pt; font-family: 'Consolas', monospace; font-size: 9.5pt; }
+                    </style>
+                </head>
+                <body>
+                    ${htmlBody}
+                </body>
+                </html>
+            `;
+
+            const blob = new Blob(['\ufeff', docHtml], { type: 'application/msword' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${state.courseName.replace(/[^a-z0-9]/gi, '_')}_Chapter.doc`;
+            a.click();
+            URL.revokeObjectURL(url);
+            showNotification("Word Document (.doc) exported!", "success");
+        }
+
+        function copyMarkdownToClipboard() {
+            const md = getCompiledMarkdown(document.getElementById('chk-clean-mode').checked);
+            if (!md) {
+                showNotification("No content available to copy.", "warning");
+                return;
+            }
+
+            const tempArea = document.createElement('textarea');
+            tempArea.value = md;
+            document.body.appendChild(tempArea);
+            tempArea.select();
+            
+            try {
+                document.execCommand('copy');
+                showNotification("Chapter Markdown copied to clipboard!", "success");
+            } catch (err) {
+                showNotification("Failed to copy content automatically.", "error");
+            } finally {
+                document.body.removeChild(tempArea);
+            }
+        }
+
+        function openPresetModal() {
+            const container = document.getElementById('preset-list-container');
+            container.innerHTML = PRESETS.map((p, idx) => `
+                <div onclick="selectPreset(${idx})" class="p-3.5 bg-slate-950 hover:bg-slate-800 border border-slate-800 hover:border-amber-500/50 rounded-lg cursor-pointer transition group">
+                    <div class="font-semibold text-slate-200 group-hover:text-amber-400 transition text-sm flex items-center justify-between">
+                        <span>${p.title}</span>
+                        <i data-lucide="chevron-right" class="w-4 h-4 text-slate-600 group-hover:text-amber-400 transition"></i>
+                    </div>
+                    <div class="text-[11px] text-slate-400 mt-1">${p.courseName} — ${p.chapterTopic}</div>
+                </div>
+            `).join('');
+
+            document.getElementById('modal-presets').classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function closePresetModal() {
+            document.getElementById('modal-presets').classList.add('hidden');
+        }
+
+        function selectPreset(index) {
+            const preset = PRESETS[index];
+            if (!preset) return;
+
+            setPublisherMode(preset.mode || "diploma");
+
+            document.getElementById('input-course-name').value = preset.courseName;
+            document.getElementById('input-chapter-topic').value = preset.chapterTopic;
+
+            if (preset.mode === "springer") {
+                if (preset.abstract) document.getElementById('input-abstract').value = preset.abstract;
+                if (preset.keywords) document.getElementById('input-keywords').value = preset.keywords;
+                if (preset.citationStyle) document.getElementById('select-citation-style').value = preset.citationStyle;
+            } else {
+                if (preset.plos) document.getElementById('input-plos').value = preset.plos.join('\n');
+                if (preset.clos) document.getElementById('input-clos').value = preset.clos.join('\n');
+            }
+
+            updateInputsFromUI();
+            closePresetModal();
+            showNotification(`Loaded Preset: ${preset.title}`, "info");
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            lucide.createIcons();
+
+            document.getElementById('input-course-name').value = state.courseName;
+            document.getElementById('input-chapter-topic').value = state.chapterTopic;
+            document.getElementById('input-plos').value = state.plos.join('\n');
+            document.getElementById('input-clos').value = state.clos.join('\n');
+            document.getElementById('input-abstract').value = state.abstract;
+            document.getElementById('input-keywords').value = state.keywords;
+
+            // Mode Switch Buttons
+            document.getElementById('btn-mode-diploma').addEventListener('click', () => setPublisherMode("diploma"));
+            document.getElementById('btn-mode-springer').addEventListener('click', () => setPublisherMode("springer"));
+
+            // API key input listener
+            document.getElementById('input-api-key').addEventListener('input', (e) => {
+                const badge = document.getElementById('api-status-badge');
+                if (e.target.value.trim()) {
+                    badge.innerText = "Custom API Key Active";
+                    badge.className = "text-[10px] bg-blue-900/80 text-blue-300 px-1.5 py-0.5 rounded border border-blue-700/50";
+                } else {
+                    badge.innerText = "Smart Auto-Mode";
+                    badge.className = "text-[10px] bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded";
+                }
+            });
+
+            // Action Buttons
+            document.getElementById('btn-generate-syllabus').addEventListener('click', generateOutlineAndMatrix);
+            document.getElementById('btn-auto-generate-all').addEventListener('click', generateAllSections);
+
+            // Tab Buttons
+            document.getElementById('tab-btn-matrix').addEventListener('click', () => switchTab('matrix'));
+            document.getElementById('tab-btn-chapter').addEventListener('click', () => switchTab('chapter'));
+
+            // Control Toolbar Actions
+            document.getElementById('chk-clean-mode').addEventListener('change', renderChapterViewer);
+            document.getElementById('btn-copy-chapter').addEventListener('click', copyMarkdownToClipboard);
+            document.getElementById('btn-toggle-edit').addEventListener('click', toggleEditMode);
+            document.getElementById('btn-export-markdown').addEventListener('click', exportMarkdown);
+            document.getElementById('btn-export-word').addEventListener('click', exportWordDoc);
+            document.getElementById('btn-export-latex').addEventListener('click', exportLaTeX);
+            document.getElementById('btn-print-view').addEventListener('click', () => window.print());
+
+            // Modal Controls
+            document.getElementById('btn-load-preset').addEventListener('click', openPresetModal);
+            document.getElementById('btn-close-preset-modal').addEventListener('click', closePresetModal);
+
+            document.getElementById('modal-presets').addEventListener('click', (e) => {
+                if (e.target.id === 'modal-presets') closePresetModal();
+            });
+        });
+    </script>
+</body>
+</html>
